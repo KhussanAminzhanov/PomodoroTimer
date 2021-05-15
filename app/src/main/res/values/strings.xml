@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Pomodoro-Timer</string>
+    <string name="stop_button">Stop</string>
+    <string name="pause_button">Pause</string>
+    <string name="start_button">Start</string>
+    <string name="countdown_timer_format">%1$d:%2$d</string>
+</resources>
