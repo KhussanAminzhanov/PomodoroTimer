@@ -12,7 +12,7 @@ const val ONE_SESSION_TIME: Long = 25 * 60 * 1000
 const val ONE_BREAK_TIME: Long = 5 * 60 * 1000
 
 enum class TimerState {
-    STARTED, PAUSED, STOPPED
+    RUNNING, PAUSED, STOPPED
 }
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,7 +33,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var isBreak = false
 
     fun startOrPauseTimer() {
-        if (_timerIsRunning.value!! == TimerState.STARTED) {
+        if (_timerIsRunning.value!! == TimerState.RUNNING) {
             pauseTimer()
         } else {
             startTimer()
@@ -41,8 +41,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun startTimer() {
-        _timerIsRunning.value = TimerState.STARTED
+        _timerIsRunning.value = TimerState.RUNNING
         countDownTimer = object : CountDownTimer(_timeLeftInMilliseconds.value!!, COUNTDOWN_INTERVAL) {
+
             override fun onTick(millisUntilFinished: Long) {
                 _timeLeftInMilliseconds.value = millisUntilFinished
             }
@@ -65,7 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun stopTimer() {
-        if (_timerIsRunning.value!! != TimerState.STOPPED) {
+        if (_timerIsRunning.value != TimerState.STOPPED) {
             countDownTimer.cancel()
             _timerIsRunning.value = TimerState.STOPPED
             _timeLeftInMilliseconds.value = ONE_SESSION_TIME
@@ -73,12 +74,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun changeTimerIntervalLength() {
-        if (isBreak) {
-            _timeLeftInMilliseconds.value = ONE_SESSION_TIME
-        } else {
-            _timeLeftInMilliseconds.value = ONE_BREAK_TIME
+        if (_timerIsRunning.value == TimerState.STOPPED) {
+            _timeLeftInMilliseconds.value = if (isBreak) ONE_SESSION_TIME else ONE_BREAK_TIME
+            isBreak = !isBreak
         }
-        isBreak = !isBreak
-
     }
 }

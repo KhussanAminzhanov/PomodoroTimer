@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         model.timerIsRunning.observe(this, { isRunning ->
             when (isRunning) {
-                TimerState.STARTED -> {
+                TimerState.RUNNING -> {
                     binding.startPauseImageButton.apply {
                         setImageResource(R.drawable.ic_pause)
                         contentDescription = getString(R.string.pause_button)
