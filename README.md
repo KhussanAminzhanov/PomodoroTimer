@@ -1,3 +1,3 @@
 # PomodoroTimer
 
-Simple Pomodoro Timer for Android OS written in kotlin
+Simple Pomodoro Timer for Android OS
