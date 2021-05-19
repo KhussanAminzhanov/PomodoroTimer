@@ -7,3 +7,4 @@ Simple Pomodoro Timer for Android OS (work in progress)
   - Add counter of total focus time
   - Store information about the day
   - Add Notification
+  - Add Labels or Categories
