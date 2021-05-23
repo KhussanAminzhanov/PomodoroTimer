@@ -6,6 +6,12 @@ import android.os.CountDownTimer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.whitedot.pomodoro_timer.data.Day
+import com.whitedot.pomodoro_timer.data.DayDatabase
+import com.whitedot.pomodoro_timer.data.DayRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 const val COUNTDOWN_INTERVAL: Long = 1000
 const val ONE_SESSION_TIME: Long = 25 * 60 * 1000
@@ -20,6 +26,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var mediaPlayer: MediaPlayer
 
+    private var isBreak = false
+
+//    private var allData: LiveData<List<Day>>
+//    private var repository: DayRepository
+
     private val _timeLeftInMilliseconds: MutableLiveData<Long> by lazy {
         MutableLiveData<Long>(ONE_SESSION_TIME)
     }
@@ -30,7 +41,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
     val timerIsRunning: LiveData<TimerState> = _timerIsRunning
 
-    private var isBreak = false
+//    // Bug in that init block
+//    init {
+//        val dayDao = DayDatabase.getDatabase(application).dayDao()
+//        repository = DayRepository(dayDao)
+//        allData = repository.readAllData
+//    }
 
     fun startOrPauseTimer() {
         if (_timerIsRunning.value!! == TimerState.RUNNING) {
@@ -79,4 +95,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             isBreak = !isBreak
         }
     }
+
+//    //Room functions
+//    fun addUser(day: Day) {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            repository.addUser(day)
+//        }
+//    }
 }
