@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.whitedot.pomodoro_timer.databinding.FragmentTimerBinding
 
 class TimerFragment : Fragment() {
@@ -28,6 +29,7 @@ class TimerFragment : Fragment() {
 
         binding?.apply {
             viewModel = sharedViewModel
+            timerLabelTextView.setOnClickListener { changeLabel() }
         }
 
         sharedViewModel.timeLeftInMilliseconds.observe(viewLifecycleOwner, { newTime ->
@@ -41,36 +43,20 @@ class TimerFragment : Fragment() {
             when (isRunning) {
                 TimerState.RUNNING -> {
                     updateButtons(R.drawable.ic_pause, R.string.pause_button, View.VISIBLE)
-//                    binding?.apply {
-//                        startPauseImageButton.apply {
-//                            setImageResource(R.drawable.ic_pause)
-//                            contentDescription = getString(R.string.pause_button)
-//                        }
-//                        stopImageButton.visibility = View.VISIBLE
-//                    }
                 }
                 TimerState.PAUSED -> {
                     updateButtons(R.drawable.ic_play_arrow, R.string.play_button, View.VISIBLE)
-//                    binding?.apply {
-//                        startPauseImageButton.apply {
-//                            setImageResource(R.drawable.ic_play_arrow)
-//                            contentDescription = getString(R.string.play_button)
-//                        }
-//                        stopImageButton.visibility = View.VISIBLE
-//                    }
                 }
                 else -> {
                     updateButtons(R.drawable.ic_play_arrow, R.string.play_button, View.GONE)
-//                    binding?.apply {
-//                        startPauseImageButton.apply {
-//                            setImageResource(R.drawable.ic_play_arrow)
-//                            contentDescription = getString(R.string.stop_button)
-//                        }
-//                        stopImageButton.visibility = View.GONE
-//                    }
                 }
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding = null
     }
 
     private fun updateButtons(imageResource: Int, stringResource: Int, visibility: Int) {
@@ -87,8 +73,7 @@ class TimerFragment : Fragment() {
         return if (number < 10) "0$number" else number.toString()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
+    private fun changeLabel() {
+        findNavController().navigate(R.id.action_timerFragment_to_labelFragment)
     }
 }

@@ -28,9 +28,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var isBreak = false
 
-//    private var allData: LiveData<List<Day>>
-//    private var repository: DayRepository
-
     private val _timeLeftInMilliseconds: MutableLiveData<Long> by lazy {
         MutableLiveData<Long>(ONE_SESSION_TIME)
     }
@@ -40,13 +37,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MutableLiveData<TimerState>(TimerState.STOPPED)
     }
     val timerIsRunning: LiveData<TimerState> = _timerIsRunning
-
-//    // Bug in that init block
-//    init {
-//        val dayDao = DayDatabase.getDatabase(application).dayDao()
-//        repository = DayRepository(dayDao)
-//        allData = repository.readAllData
-//    }
 
     fun startOrPauseTimer() {
         if (_timerIsRunning.value!! == TimerState.RUNNING) {
@@ -95,11 +85,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             isBreak = !isBreak
         }
     }
-
-//    //Room functions
-//    fun addUser(day: Day) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            repository.addUser(day)
-//        }
-//    }
 }

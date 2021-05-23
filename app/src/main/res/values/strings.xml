@@ -5,4 +5,5 @@
     <string name="play_button">Play</string>
     <string name="label_work">Work</string>
     <string name="label_study">Study</string>
+    <string name="add_label">Add Label</string>
 </resources>
