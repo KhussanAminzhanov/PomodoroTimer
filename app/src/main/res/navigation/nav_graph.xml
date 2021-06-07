@@ -9,14 +9,5 @@
         android:id="@+id/timerFragment"
         android:name="com.whitedot.pomodoro_timer.TimerFragment"
         android:label="TimerFragment"
-        tools:layout="@layout/fragment_timer" >
-        <action
-            android:id="@+id/action_timerFragment_to_labelFragment"
-            app:destination="@id/labelFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/labelFragment"
-        android:name="com.whitedot.pomodoro_timer.LabelFragment"
-        android:label="fragment_label"
-        tools:layout="@layout/fragment_label" />
+        tools:layout="@layout/fragment_timer" />
 </navigation>

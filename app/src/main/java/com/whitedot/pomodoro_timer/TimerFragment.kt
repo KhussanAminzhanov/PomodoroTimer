@@ -1,13 +1,14 @@
 package com.whitedot.pomodoro_timer
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.whitedot.pomodoro_timer.databinding.FragmentTimerBinding
+
+const val ONE_MINUTE = 60000 // in milliseconds
 
 class TimerFragment : Fragment() {
 
@@ -29,12 +30,11 @@ class TimerFragment : Fragment() {
 
         binding?.apply {
             viewModel = sharedViewModel
-            timerLabelTextView.setOnClickListener { changeLabel() }
         }
 
         sharedViewModel.timeLeftInMilliseconds.observe(viewLifecycleOwner, { newTime ->
-            val minutes = newTime / 60000
-            val seconds = newTime % 60000 / COUNTDOWN_INTERVAL
+            val minutes = newTime / ONE_MINUTE
+            val seconds = newTime % ONE_MINUTE / COUNTDOWN_INTERVAL
             val timeLeftString = "${addZero(minutes)}:${addZero(seconds)}"
             binding?.apply { timerTextView.text = timeLeftString }
         })
@@ -51,6 +51,17 @@ class TimerFragment : Fragment() {
                     updateButtons(R.drawable.ic_play_arrow, R.string.play_button, View.GONE)
                 }
             }
+        })
+
+        sharedViewModel.totalTimeSpent.observe(viewLifecycleOwner, { totalTime ->
+            val hours: Long = totalTime / (60 * ONE_MINUTE)
+            val minutes: Long = totalTime % (60 * ONE_MINUTE) / ONE_MINUTE
+
+            var totalTimeString = "$minutes minutes"
+            if (hours > 0) { totalTimeString = "$hours hours $totalTimeString"
+            }
+
+            binding?.apply { totalSessionsCounterTextView.text = totalTimeString }
         })
     }
 
@@ -71,9 +82,5 @@ class TimerFragment : Fragment() {
 
     private fun addZero(number: Long): String {
         return if (number < 10) "0$number" else number.toString()
-    }
-
-    private fun changeLabel() {
-        findNavController().navigate(R.id.action_timerFragment_to_labelFragment)
     }
 }

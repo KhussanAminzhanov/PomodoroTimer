@@ -6,12 +6,6 @@ import android.os.CountDownTimer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import com.whitedot.pomodoro_timer.data.Day
-import com.whitedot.pomodoro_timer.data.DayDatabase
-import com.whitedot.pomodoro_timer.data.DayRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 const val COUNTDOWN_INTERVAL: Long = 1000
 const val ONE_SESSION_TIME: Long = 25 * 60 * 1000
@@ -38,6 +32,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
     val timerIsRunning: LiveData<TimerState> = _timerIsRunning
 
+    private val _totalTimeSpent: MutableLiveData<Long> by lazy {
+        MutableLiveData<Long>(0)
+    }
+    val totalTimeSpent: LiveData<Long> = _totalTimeSpent
+
     fun startOrPauseTimer() {
         if (_timerIsRunning.value!! == TimerState.RUNNING) {
             pauseTimer()
@@ -55,10 +54,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onFinish() {
-                _timeLeftInMilliseconds.value = ONE_SESSION_TIME
                 _timerIsRunning.value = TimerState.STOPPED
+                _totalTimeSpent.value = _totalTimeSpent.value
+                    ?.plus(if (!isBreak) ONE_SESSION_TIME else 0)
 
-                mediaPlayer = MediaPlayer.create(getApplication(), R.raw.timer)
+                changeTimerIntervalLength()
+
+                mediaPlayer = MediaPlayer.create(getApplication(), R.raw.ding)
                 mediaPlayer.setOnCompletionListener { mediaPlayer.release() }
                 mediaPlayer.start()
             }

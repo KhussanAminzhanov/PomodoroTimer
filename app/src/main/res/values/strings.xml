@@ -6,4 +6,7 @@
     <string name="label_work">Work</string>
     <string name="label_study">Study</string>
     <string name="add_label">Add Label</string>
+    <string name="hint_word">Label…</string>
+    <string name="button_save">Save</string>
+    <string name="empty_not_saved">Label not saved because it is empty.</string>
 </resources>

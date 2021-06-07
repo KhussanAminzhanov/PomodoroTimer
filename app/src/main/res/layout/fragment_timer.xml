@@ -37,30 +37,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="23 hour 59 minutes"
             android:textColor="@color/white"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="@+id/timer_text_view"
             app:layout_constraintStart_toStartOf="@+id/timer_text_view"
-            app:layout_constraintTop_toBottomOf="@+id/timer_text_view" />
-
-        <TextView
-            android:id="@+id/timer_label_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/text_view_square_rounded_corner"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
-            app:layout_goneMarginTop="10dp"
-            android:paddingBottom="3dp"
-            android:text="Study"
-            android:textColor="@color/white"
-            android:textSize="15sp"
-            app:layout_constraintEnd_toEndOf="@+id/timer_text_view"
-            app:layout_constraintHorizontal_bias="0.489"
-            app:layout_constraintStart_toStartOf="@+id/timer_text_view"
-            app:layout_constraintTop_toBottomOf="@+id/total_sessions_counter_text_view" />
+            app:layout_constraintTop_toBottomOf="@+id/timer_text_view"
+            tools:text="23 hour 59 minutes" />
 
         <ImageButton
             android:id="@+id/start_pause_image_button"
