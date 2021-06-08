@@ -1,6 +1,5 @@
 package com.whitedot.pomodoro_timer
 
-import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
@@ -8,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-
-const val PREFERENCE_NAME = "total_time"
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class PomodoroPreferencesRepository(private val dataStore: DataStore<Preferences>) {
 
@@ -17,15 +16,23 @@ class PomodoroPreferencesRepository(private val dataStore: DataStore<Preferences
 
     private object PreferencesKeys {
         val TOTAL_TIME = longPreferencesKey("total_time")
+        val CURRENT_DATE = stringPreferencesKey("current_date")
     }
 
-    suspend fun saveToDataStore(totalTime: Long) {
+    suspend fun saveTotalTime(totalTime: Long) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.TOTAL_TIME] = totalTime
         }
     }
 
-    val timerPreferencesFlow: Flow<Long> = dataStore.data
+    suspend fun saveCurrentDate(currentDate: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CURRENT_DATE] = currentDate
+        }
+    }
+
+
+    val totalTimePreferenceFlow: Flow<Long> = dataStore.data
         .catch { exception ->
             if (exception is IOException) {
                 Log.d(TAG, "Error reading preferences.", exception)
@@ -36,6 +43,19 @@ class PomodoroPreferencesRepository(private val dataStore: DataStore<Preferences
         }.map { preference ->
             val totalTime: Long = preference[PreferencesKeys.TOTAL_TIME] ?: 0
             totalTime
+        }
+
+    val currentDatePreferenceFlow: Flow<String> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                Log.d(TAG, "Error reading preferences.", exception)
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }.map { preference ->
+            val currentDate: String = preference[PreferencesKeys.CURRENT_DATE] ?: LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE)
+            currentDate
         }
 
 }

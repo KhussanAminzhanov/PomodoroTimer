@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.whitedot.pomodoro_timer.databinding.FragmentTimerBinding
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class TimerFragment : Fragment() {
 
@@ -24,10 +26,21 @@ class TimerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        sharedViewModel.updateCurrentDate()
 
         binding?.apply {
             viewModel = sharedViewModel
         }
+
+        sharedViewModel.currentDay.observe(viewLifecycleOwner, { newCurrentDay ->
+            binding!!.timerDateTextView.text = newCurrentDay
+            if (!newCurrentDay.equals(
+                    LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE)
+                )
+            ) {
+                sharedViewModel.resetTotalTime()
+            }
+        })
 
         sharedViewModel.timeLeftInMilliseconds.observe(viewLifecycleOwner, { newTime ->
             val minutes = newTime / ONE_MINUTE

@@ -5,6 +5,8 @@ import android.media.MediaPlayer
 import android.os.CountDownTimer
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 const val COUNTDOWN_INTERVAL: Long = 1000
 const val ONE_MINUTE: Long = 60000
@@ -21,8 +23,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private lateinit var mediaPlayer: MediaPlayer
 
     private var dataStoreRepository = PomodoroPreferencesRepository(application.dataStore)
-    val totalTime = dataStoreRepository.timerPreferencesFlow.asLiveData()
     private var isBreak = false
+
+    val totalTime = dataStoreRepository.totalTimePreferenceFlow.asLiveData()
+    val currentDay = dataStoreRepository.currentDatePreferenceFlow.asLiveData()
 
     private val _timeLeftInMilliseconds: MutableLiveData<Long> by lazy {
         MutableLiveData<Long>(ONE_SESSION_TIME)
@@ -44,29 +48,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun startTimer() {
         _timerIsRunning.value = TimerState.RUNNING
-        countDownTimer = object : CountDownTimer(_timeLeftInMilliseconds.value!!, COUNTDOWN_INTERVAL) {
+        countDownTimer =
+            object : CountDownTimer(_timeLeftInMilliseconds.value!!, COUNTDOWN_INTERVAL) {
 
-            override fun onTick(millisUntilFinished: Long) {
-                _timeLeftInMilliseconds.value = millisUntilFinished
-            }
-
-            override fun onFinish() {
-                _timerIsRunning.value = TimerState.STOPPED
-
-                if (!isBreak) {
-                    viewModelScope.launch {
-                        saveTotalTimeSpent(totalTime.value?.plus(ONE_SESSION_TIME)!!)
-                    }
+                override fun onTick(millisUntilFinished: Long) {
+                    _timeLeftInMilliseconds.value = millisUntilFinished
                 }
 
-                changeTimerIntervalLength()
-
-                mediaPlayer = MediaPlayer.create(getApplication(), R.raw.ding)
-                mediaPlayer.setOnCompletionListener { mediaPlayer.release() }
-                mediaPlayer.start()
-            }
-
-        }.start()
+                override fun onFinish() {
+                    _timerIsRunning.value = TimerState.STOPPED
+                    if (!isBreak) {
+                        viewModelScope.launch {
+                            saveTotalTimeSpent(totalTime.value?.plus(ONE_SESSION_TIME)!!)
+                        }
+                    }
+                    updateCurrentDate()
+                    changeTimerIntervalLength()
+                    mediaPlayer = MediaPlayer.create(getApplication(), R.raw.ding)
+                    mediaPlayer.setOnCompletionListener { mediaPlayer.release() }
+                    mediaPlayer.start()
+                }
+            }.start()
     }
 
     private fun pauseTimer() {
@@ -75,7 +77,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun saveTotalTimeSpent(newTotalTime: Long) {
-        dataStoreRepository.saveToDataStore(newTotalTime)
+        dataStoreRepository.saveTotalTime(newTotalTime)
     }
 
     fun stopTimer() {
@@ -92,8 +94,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             isBreak = !isBreak
         }
     }
-    
+
     fun resetTotalTime() {
-        viewModelScope.launch { dataStoreRepository.saveToDataStore(0) }
+        viewModelScope.launch {
+            dataStoreRepository.saveTotalTime(0)
+        }
+    }
+
+
+    fun updateCurrentDate() {
+        val newDate = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE)
+        if (!currentDay.value.equals(newDate))
+            viewModelScope.launch {
+                dataStoreRepository.saveCurrentDate(newDate)
+            }
     }
 }
