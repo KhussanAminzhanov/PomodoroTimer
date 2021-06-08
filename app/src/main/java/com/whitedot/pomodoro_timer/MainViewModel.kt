@@ -3,13 +3,13 @@ package com.whitedot.pomodoro_timer
 import android.app.Application
 import android.media.MediaPlayer
 import android.os.CountDownTimer
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
+import kotlinx.coroutines.launch
 
 const val COUNTDOWN_INTERVAL: Long = 1000
-const val ONE_SESSION_TIME: Long = 25 * 60 * 1000
-const val ONE_BREAK_TIME: Long = 5 * 60 * 1000
+const val ONE_MINUTE: Long = 60000
+const val ONE_SESSION_TIME: Long = 25 * ONE_MINUTE
+const val ONE_BREAK_TIME: Long = 5 * ONE_MINUTE
 
 enum class TimerState {
     RUNNING, PAUSED, STOPPED
@@ -20,6 +20,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var mediaPlayer: MediaPlayer
 
+    private var dataStoreRepository = PomodoroPreferencesRepository(application.dataStore)
+    val totalTime = dataStoreRepository.timerPreferencesFlow.asLiveData()
     private var isBreak = false
 
     private val _timeLeftInMilliseconds: MutableLiveData<Long> by lazy {
@@ -31,11 +33,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         MutableLiveData<TimerState>(TimerState.STOPPED)
     }
     val timerIsRunning: LiveData<TimerState> = _timerIsRunning
-
-    private val _totalTimeSpent: MutableLiveData<Long> by lazy {
-        MutableLiveData<Long>(0)
-    }
-    val totalTimeSpent: LiveData<Long> = _totalTimeSpent
 
     fun startOrPauseTimer() {
         if (_timerIsRunning.value!! == TimerState.RUNNING) {
@@ -55,8 +52,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             override fun onFinish() {
                 _timerIsRunning.value = TimerState.STOPPED
-                _totalTimeSpent.value = _totalTimeSpent.value
-                    ?.plus(if (!isBreak) ONE_SESSION_TIME else 0)
+
+                if (!isBreak) {
+                    viewModelScope.launch {
+                        saveTotalTimeSpent(totalTime.value?.plus(ONE_SESSION_TIME)!!)
+                    }
+                }
 
                 changeTimerIntervalLength()
 
@@ -73,6 +74,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _timerIsRunning.value = TimerState.PAUSED
     }
 
+    private suspend fun saveTotalTimeSpent(newTotalTime: Long) {
+        dataStoreRepository.saveToDataStore(newTotalTime)
+    }
+
     fun stopTimer() {
         if (_timerIsRunning.value != TimerState.STOPPED) {
             countDownTimer.cancel()
@@ -86,5 +91,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _timeLeftInMilliseconds.value = if (isBreak) ONE_SESSION_TIME else ONE_BREAK_TIME
             isBreak = !isBreak
         }
+    }
+    
+    fun resetTotalTime() {
+        viewModelScope.launch { dataStoreRepository.saveToDataStore(0) }
     }
 }

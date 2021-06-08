@@ -8,12 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.whitedot.pomodoro_timer.databinding.FragmentTimerBinding
 
-const val ONE_MINUTE = 60000 // in milliseconds
-
 class TimerFragment : Fragment() {
 
     private var binding: FragmentTimerBinding? = null
-
     private val sharedViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -53,12 +50,13 @@ class TimerFragment : Fragment() {
             }
         })
 
-        sharedViewModel.totalTimeSpent.observe(viewLifecycleOwner, { totalTime ->
+        sharedViewModel.totalTime.observe(viewLifecycleOwner, { totalTime ->
             val hours: Long = totalTime / (60 * ONE_MINUTE)
             val minutes: Long = totalTime % (60 * ONE_MINUTE) / ONE_MINUTE
 
             var totalTimeString = "$minutes minutes"
-            if (hours > 0) { totalTimeString = "$hours hours $totalTimeString"
+            if (hours > 0) {
+                totalTimeString = "$hours hours $totalTimeString"
             }
 
             binding?.apply { totalSessionsCounterTextView.text = totalTimeString }
